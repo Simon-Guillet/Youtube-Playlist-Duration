@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        Youtube Playlist duration
+// @name        Youtube Playlist Duration
 // @namespace   Violentmonkey Scripts
 // @match       https://www.youtube.com/watch
 // @grant       none
@@ -25,9 +25,10 @@ VM.observe(document.body, () => {
 	)
 
 	if (publisherContainer) {
-		const videoNum = parseInt(
-			publisherContainer.querySelector(".index-message :last-child").textContent
-		)
+		let videoNum =
+			publisherContainer.querySelector(".index-message").textContent
+		videoNum = parseInt(videoNum.slice(videoNum.search("/") + 2))
+
 		if (
 			playlistPanel &&
 			publisherContainer &&
