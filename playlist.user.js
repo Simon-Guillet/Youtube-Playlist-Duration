@@ -21,6 +21,7 @@ VM.observe(document.body, () => {
 	)
 
 	if (publisherContainer) {
+		//indexMessage = video "2 / 8"
 		let indexMessage =
 			publisherContainer.querySelector(".index-message").textContent
 		videoNum = parseInt(indexMessage.slice(indexMessage.search("/") + 2))
@@ -29,19 +30,26 @@ VM.observe(document.body, () => {
 			videoNum === listVideos.length &&
 			window.getComputedStyle(publisherContainer, null).display === "flex"
 		) {
-			// console.log("Loading script")
-
 			function reset() {
+				// Setup variables
 				indexMessage =
 					publisherContainer.querySelector(".index-message").textContent
 				currentVideo = parseInt(
 					indexMessage.slice(0, indexMessage.search("/") - 1)
 				)
-				// console.log(currentVideo)
 				listVideos = document.querySelectorAll(
 					"#secondary #playlist ytd-thumbnail-overlay-time-status-renderer"
 				)
+				currentTime = document.querySelector(
+					".ytp-chrome-bottom .ytp-time-current"
+				).textContent
+
+				currentLength = document.querySelector(
+					".ytp-chrome-bottom .ytp-time-duration"
+				).textContent
+
 				timeList = []
+				secondsList = []
 				sumnHours = 0
 				sumnMinutes = 0
 				sumnSeconds = 0
@@ -55,106 +63,96 @@ VM.observe(document.body, () => {
 				listVideos.forEach(function (currentValue, currentIndex, listObj) {
 					timeList.push(currentValue.lastChild.innerText)
 				})
-				// console.log(timeList)
+				timeList.forEach(function (value, index, array) {
+					turnLengthIntoNumbers(value)
+					seconds = convertToSeconds(hours, minutes, seconds)
+					secondsList.push(seconds)
+				})
 			}
 
 			function addTimes() {
-				timeList.forEach(function (value, i, array) {
-					// get part before first ":"
-					firstThing = value.search(":")
-					newStr = value.slice(firstThing + 1)
-
-					secondThing = newStr.search(":") // second ":" position
-					if (secondThing > -1) {
-						// hh:mm:ss
-						hours = value.slice(0, firstThing)
-						minutes = value.slice(firstThing + 1, firstThing + 3)
-						seconds = value.slice(firstThing + 4)
-					} else {
-						// mm:ss
-						hours = "0"
-						minutes = value.slice(0, firstThing)
-						seconds = value.slice(firstThing + 1)
-					}
-					// turn str into int
-					hours = parseInt(hours)
-					minutes = parseInt(minutes)
-					seconds = parseInt(seconds)
-					// console.log(hours, minutes, seconds)
-
-					sumnHours += hours
-					sumnMinutes += minutes
-					sumnSeconds += seconds
-					// console.log(sumnHours, sumnMinutes, sumnSeconds)
+				// adds all durations together
+				secondsList.forEach(function (value, i, array) {
+					sumnSeconds += value
 				})
 
+				// adds all past durations together
 				for (let i = 0; i < currentVideo - 1; i++) {
-					const value = timeList[i]
-					// get part before first ":"
-					firstThing = value.search(":")
-					newStr = value.slice(firstThing + 1)
+					const value = secondsList[i]
+					sumnSecondsPast += value
+				}
 
-					secondThing = newStr.search(":") // second ":" position
-					if (secondThing > -1) {
-						// hh:mm:ss
-						hours = value.slice(0, firstThing)
-						minutes = value.slice(firstThing + 1, firstThing + 3)
-						seconds = value.slice(firstThing + 4)
-					} else {
-						// mm:ss
-						hours = "0"
-						minutes = value.slice(0, firstThing)
-						seconds = value.slice(firstThing + 1)
-					}
-					// turn str into int
-					hours = parseInt(hours)
-					minutes = parseInt(minutes)
-					seconds = parseInt(seconds)
-					// console.log(hours, minutes, seconds)
+				// gets lenght of video playing and the one that should play
+				turnLengthIntoNumbers(currentLength)
+				currentLength = convertToSeconds(hours, minutes, seconds)
+				currentLengthActual = timeList[currentVideo - 1]
+				turnLengthIntoNumbers(currentLengthActual)
+				currentLengthActual = convertToSeconds(hours, minutes, seconds)
 
-					sumnHoursPast += hours
-					sumnMinutesPast += minutes
-					sumnSecondsPast += seconds
-					// console.log(sumnHoursPast, sumnMinutesPast, sumnSecondsPast)
+				// is video playing not an ad?
+				if (
+					currentLength === currentLengthActual ||
+					currentLength === currentLengthActual - 1
+				) {
+					// adds time of video playing to past
+					turnLengthIntoNumbers(currentTime)
+					currentTime = convertToSeconds(hours, minutes, seconds)
+					sumnSecondsPast += currentTime
 				}
 			}
 
-			function normaliseTime() {
-				quo = Math.floor(sumnSeconds / 60)
-				sumnSeconds %= 60
+			function normaliseTime(hours, minutes, seconds) {
+				// converts into formated duration
+				quo = Math.floor(seconds / 60)
+				seconds %= 60
 
-				sumnMinutes += quo
-				quo = Math.floor(sumnMinutes / 60)
-				sumnMinutes %= 60
-				sumnHours += quo
-				sumnMinutes = sumnMinutes.toLocaleString("en-US", {
+				minutes += quo
+				quo = Math.floor(minutes / 60)
+				minutes %= 60
+				hours += quo
+				minutes = minutes.toLocaleString("en-US", {
 					minimumIntegerDigits: 2,
 					useGrouping: false,
 				})
-				sumnSeconds = sumnSeconds.toLocaleString("en-US", {
+				seconds = seconds.toLocaleString("en-US", {
 					minimumIntegerDigits: 2,
 					useGrouping: false,
 				})
-				// console.log(sumnHours, sumnMinutes, sumnSeconds)
+				return [hours, minutes, seconds]
+			}
 
-				quo = Math.floor(sumnSecondsPast / 60)
-				sumnSecondsPast %= 60
+			function turnLengthIntoNumbers(length) {
+				// converts "h:mm:ss" into (hours, minutes, seconds)
 
-				sumnMinutesPast += quo
-				quo = Math.floor(sumnMinutesPast / 60)
-				sumnMinutesPast %= 60
-				sumnHoursPast += quo
-				sumnMinutesPast = sumnMinutesPast.toLocaleString("en-US", {
-					minimumIntegerDigits: 2,
-					useGrouping: false,
-				})
-				sumnSecondsPast = sumnSecondsPast.toLocaleString("en-US", {
-					minimumIntegerDigits: 2,
-					useGrouping: false,
-				})
+				// get part before first ":"
+				firstThing = length.search(":")
+				newStr = length.slice(firstThing + 1)
+
+				secondThing = newStr.search(":") // second ":" position
+				if (secondThing > -1) {
+					// hh:mm:ss
+					hours = length.slice(0, firstThing)
+					minutes = length.slice(firstThing + 1, firstThing + 3)
+					seconds = length.slice(firstThing + 4)
+				} else {
+					// mm:ss
+					hours = "0"
+					minutes = length.slice(0, firstThing)
+					seconds = length.slice(firstThing + 1)
+				}
+				// turn str into int
+				hours = parseInt(hours)
+				minutes = parseInt(minutes)
+				seconds = parseInt(seconds)
+			}
+
+			function convertToSeconds(hours, minutes, seconds) {
+				seconds += minutes * 60 + hours * 360
+				return seconds
 			}
 
 			function createNode() {
+				// creates div w/ "mm:ss / mm:ss"
 				if (publisherContainer.lastElementChild.id === "playlist-duration") {
 					document.querySelector("#playlist-duration").remove()
 				}
@@ -166,37 +164,39 @@ VM.observe(document.body, () => {
 					"ytd-playlist-panel-renderer"
 				)
 				duration.textContent =
-					sumnHoursPast +
+					totalPast[0] +
 					":" +
-					sumnMinutesPast +
+					totalPast[1] +
 					":" +
-					sumnSecondsPast +
+					totalPast[2] +
 					" / " +
-					sumnHours +
+					total[0] +
 					":" +
-					sumnMinutes +
+					total[1] +
 					":" +
-					sumnSeconds
+					total[2]
 				duration.style.marginInline = "8px"
 				duration.style.fontWeight = "bold"
 				publisherContainer.append(duration)
 			}
 
 			function update() {
-				console.log("updating")
 				reset()
 				getTimeList()
 				addTimes()
-				normaliseTime()
+				total = normaliseTime(sumnHours, sumnMinutes, sumnSeconds)
+				totalPast = normaliseTime(
+					sumnHoursPast,
+					sumnMinutesPast,
+					sumnSecondsPast
+				)
 				createNode()
 			}
 
 			update()
 			var monTimer = setInterval(function () {
 				update()
-			}, 10000)
-
-			// console.log("Script loaded")
+			}, 1000)
 
 			// disconnect observer
 			return true
