@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Youtube Playlist Duration
 // @namespace   Violentmonkey Scripts
-// @match       https://www.youtube.com/watch
+// @match       https://www.youtube.com/*
 // @grant       none
 // @version     1.0
 // @author      Simon-Guillet
@@ -21,9 +21,9 @@ VM.observe(document.body, () => {
 	)
 
 	if (publisherContainer) {
-		let videoNum =
+		let indexMessage =
 			publisherContainer.querySelector(".index-message").textContent
-		videoNum = parseInt(videoNum.slice(videoNum.search("/") + 2))
+		videoNum = parseInt(indexMessage.slice(indexMessage.search("/") + 2))
 
 		if (
 			videoNum === listVideos.length &&
@@ -32,6 +32,12 @@ VM.observe(document.body, () => {
 			// console.log("Loading script")
 
 			function reset() {
+				indexMessage =
+					publisherContainer.querySelector(".index-message").textContent
+				currentVideo = parseInt(
+					indexMessage.slice(0, indexMessage.search("/") - 1)
+				)
+				// console.log(currentVideo)
 				listVideos = document.querySelectorAll(
 					"#secondary #playlist ytd-thumbnail-overlay-time-status-renderer"
 				)
@@ -39,6 +45,9 @@ VM.observe(document.body, () => {
 				sumnHours = 0
 				sumnMinutes = 0
 				sumnSeconds = 0
+				sumnHoursPast = 0
+				sumnMinutesPast = 0
+				sumnSecondsPast = 0
 			}
 
 			function getTimeList() {
@@ -78,6 +87,36 @@ VM.observe(document.body, () => {
 					sumnSeconds += seconds
 					// console.log(sumnHours, sumnMinutes, sumnSeconds)
 				})
+
+				for (let i = 0; i < currentVideo - 1; i++) {
+					const value = timeList[i]
+					// get part before first ":"
+					firstThing = value.search(":")
+					newStr = value.slice(firstThing + 1)
+
+					secondThing = newStr.search(":") // second ":" position
+					if (secondThing > -1) {
+						// hh:mm:ss
+						hours = value.slice(0, firstThing)
+						minutes = value.slice(firstThing + 1, firstThing + 3)
+						seconds = value.slice(firstThing + 4)
+					} else {
+						// mm:ss
+						hours = "0"
+						minutes = value.slice(0, firstThing)
+						seconds = value.slice(firstThing + 1)
+					}
+					// turn str into int
+					hours = parseInt(hours)
+					minutes = parseInt(minutes)
+					seconds = parseInt(seconds)
+					// console.log(hours, minutes, seconds)
+
+					sumnHoursPast += hours
+					sumnMinutesPast += minutes
+					sumnSecondsPast += seconds
+					// console.log(sumnHoursPast, sumnMinutesPast, sumnSecondsPast)
+				}
 			}
 
 			function normaliseTime() {
@@ -97,6 +136,22 @@ VM.observe(document.body, () => {
 					useGrouping: false,
 				})
 				// console.log(sumnHours, sumnMinutes, sumnSeconds)
+
+				quo = Math.floor(sumnSecondsPast / 60)
+				sumnSecondsPast %= 60
+
+				sumnMinutesPast += quo
+				quo = Math.floor(sumnMinutesPast / 60)
+				sumnMinutesPast %= 60
+				sumnHoursPast += quo
+				sumnMinutesPast = sumnMinutesPast.toLocaleString("en-US", {
+					minimumIntegerDigits: 2,
+					useGrouping: false,
+				})
+				sumnSecondsPast = sumnSecondsPast.toLocaleString("en-US", {
+					minimumIntegerDigits: 2,
+					useGrouping: false,
+				})
 			}
 
 			function createNode() {
@@ -110,7 +165,18 @@ VM.observe(document.body, () => {
 					"style-scope",
 					"ytd-playlist-panel-renderer"
 				)
-				duration.textContent = sumnHours + ":" + sumnMinutes + ":" + sumnSeconds
+				duration.textContent =
+					sumnHoursPast +
+					":" +
+					sumnMinutesPast +
+					":" +
+					sumnSecondsPast +
+					" / " +
+					sumnHours +
+					":" +
+					sumnMinutes +
+					":" +
+					sumnSeconds
 				duration.style.marginInline = "8px"
 				duration.style.fontWeight = "bold"
 				publisherContainer.append(duration)
