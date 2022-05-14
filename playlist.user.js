@@ -16,9 +16,6 @@ VM.observe(document.body, () => {
 	const publisherContainer = document.querySelector(
 		"#secondary #playlist #publisher-container"
 	)
-	const testVideo = document.querySelector(
-		"#secondary #playlist ytd-thumbnail-overlay-time-status-renderer"
-	)
 
 	let listVideos = document.querySelectorAll(
 		"#secondary #playlist ytd-thumbnail-overlay-time-status-renderer"
@@ -29,73 +26,108 @@ VM.observe(document.body, () => {
 			publisherContainer.querySelector(".index-message").textContent
 		videoNum = parseInt(videoNum.slice(videoNum.search("/") + 2))
 
-		if (
-			playlistPanel &&
-			publisherContainer &&
-			testVideo &&
-			videoNum === listVideos.length
-		) {
+		if (playlistPanel && videoNum === listVideos.length) {
 			// console.log("Loading script")
-			let timeList = []
 
-			let listVideos = document.querySelectorAll(
-				"#secondary #playlist ytd-thumbnail-overlay-time-status-renderer"
-			)
+			function reset() {
+				listVideos = document.querySelectorAll(
+					"#secondary #playlist ytd-thumbnail-overlay-time-status-renderer"
+				)
+				timeList = []
+				sumnHours = 0
+				sumnMinutes = 0
+				sumnSeconds = 0
+			}
 
-			timeList = []
-			sumnHours = 0
-			sumnMinutes = 0
-			sumnSeconds = 0
+			function getTimeList() {
+				// get the duration of all videos
+				listVideos.forEach(function (currentValue, currentIndex, listObj) {
+					timeList.push(currentValue.lastChild.innerText)
+				})
+				// console.log(timeList)
+			}
 
-			listVideos.forEach(function (currentValue, currentIndex, listObj) {
-				timeList.push(currentValue.lastChild.innerText)
-			})
+			function addTimes() {
+				timeList.forEach(function (value, i, array) {
+					// get part before first ":"
+					firstThing = value.search(":")
+					newStr = value.slice(firstThing + 1)
 
-			// console.log(timeList)
+					secondThing = newStr.search(":") // second ":" position
+					if (secondThing > -1) {
+						// hh:mm:ss
+						hours = value.slice(0, firstThing)
+						minutes = value.slice(firstThing + 1, firstThing + 3)
+						seconds = value.slice(firstThing + 4)
+					} else {
+						// mm:ss
+						hours = "0"
+						minutes = value.slice(0, firstThing)
+						seconds = value.slice(firstThing + 1)
+					}
+					// turn str into int
+					hours = parseInt(hours)
+					minutes = parseInt(minutes)
+					seconds = parseInt(seconds)
+					// console.log(hours, minutes, seconds)
 
-			timeList.forEach(function (value, i, array) {
-				firstThing = value.search(":")
-				newStr = value.slice(firstThing + 1)
+					sumnHours += hours
+					sumnMinutes += minutes
+					sumnSeconds += seconds
+					// console.log(sumnHours, sumnMinutes, sumnSeconds)
+				})
+			}
 
-				secondThing = newStr.search(":")
-				if (secondThing > -1) {
-					hours = value.slice(0, firstThing)
-					minutes = value.slice(firstThing + 1, firstThing + 3)
-					seconds = value.slice(firstThing + 4)
-				} else {
-					hours = "0"
-					minutes = value.slice(0, firstThing)
-					seconds = value.slice(firstThing + 1)
+			function normaliseTime() {
+				quo = Math.floor(sumnSeconds / 60)
+				sumnSeconds %= 60
+
+				sumnMinutes += quo
+				quo = Math.floor(sumnMinutes / 60)
+				sumnMinutes %= 60
+				sumnHours += quo
+				sumnMinutes = sumnMinutes.toLocaleString("en-US", {
+					minimumIntegerDigits: 2,
+					useGrouping: false,
+				})
+				sumnSeconds = sumnSeconds.toLocaleString("en-US", {
+					minimumIntegerDigits: 2,
+					useGrouping: false,
+				})
+				// console.log(sumnHours, sumnMinutes, sumnSeconds)
+			}
+
+			function createNode() {
+				if (publisherContainer.lastElementChild.id === "playlist-duration") {
+					document.querySelector("#playlist-duration").remove()
 				}
-				hours = parseInt(hours)
-				minutes = parseInt(minutes)
-				seconds = parseInt(seconds)
-				// console.log(hours, minutes, seconds)
+				let duration = document.createElement("div")
+				duration.setAttribute("id", "playlist-duration")
+				duration.classList.add(
+					"index-message-wrapper",
+					"style-scope",
+					"ytd-playlist-panel-renderer"
+				)
+				duration.textContent = sumnHours + ":" + sumnMinutes + ":" + sumnSeconds
+				duration.style.marginInline = "8px"
+				duration.style.fontWeight = "bold"
+				publisherContainer.append(duration)
+			}
 
-				sumnHours += hours
-				sumnMinutes += minutes
-				sumnSeconds += seconds
-			})
-			// console.log(sumnHours, sumnMinutes, sumnSeconds)
-			quo = Math.floor(sumnSeconds / 60)
-			sumnSeconds %= 60
+			function update() {
+				console.log("updating")
+				reset()
+				getTimeList()
+				addTimes()
+				normaliseTime()
+				createNode()
+			}
 
-			sumnMinutes += quo
-			quo = Math.floor(sumnMinutes / 60)
-			sumnMinutes %= 60
-			sumnHours += quo
-			// console.log(sumnHours, sumnMinutes, sumnSeconds)
+			update()
+			var monTimer = setInterval(function () {
+				update()
+			}, 10000)
 
-			let duration = document.createElement("div")
-			duration.classList.add(
-				"index-message-wrapper",
-				"style-scope",
-				"ytd-playlist-panel-renderer"
-			)
-			duration.textContent = sumnHours + ":" + sumnMinutes + ":" + sumnSeconds
-			duration.style.marginInline = "8px"
-			duration.style.fontWeight = "bold"
-			publisherContainer.append(duration)
 			// console.log("Script loaded")
 
 			// disconnect observer
