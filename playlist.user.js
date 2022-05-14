@@ -12,7 +12,6 @@
 
 VM.observe(document.body, () => {
 	// Find the target node
-	const playlistPanel = document.querySelector("ytd-playlist-panel-renderer")
 	const publisherContainer = document.querySelector(
 		"#secondary #playlist #publisher-container"
 	)
@@ -26,7 +25,10 @@ VM.observe(document.body, () => {
 			publisherContainer.querySelector(".index-message").textContent
 		videoNum = parseInt(videoNum.slice(videoNum.search("/") + 2))
 
-		if (playlistPanel && videoNum === listVideos.length) {
+		if (
+			videoNum === listVideos.length &&
+			window.getComputedStyle(publisherContainer, null).display === "flex"
+		) {
 			// console.log("Loading script")
 
 			function reset() {
