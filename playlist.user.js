@@ -1,12 +1,15 @@
 // ==UserScript==
 // @name        Youtube Playlist Duration
-// @namespace   Violentmonkey Scripts
+// @namespace   https://github.com/Simon-Guillet/Youtube-Playlist-Duration
 // @match       https://www.youtube.com/*
 // @grant       none
 // @version     1.0
 // @author      Simon-Guillet
 // @description 13/05/2022, 00:04:25
-// @require https://cdn.jsdelivr.net/npm/@violentmonkey/dom@1
+// @require		https://cdn.jsdelivr.net/npm/@violentmonkey/dom@1
+// @downloadURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/blob/master/playlist.user.js
+// @updateURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/blob/master/playlist.user.js
+// @supportURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/issues
 
 // ==/UserScript==
 
@@ -40,13 +43,8 @@ VM.observe(document.body, () => {
 				listVideos = document.querySelectorAll(
 					"#secondary #playlist ytd-thumbnail-overlay-time-status-renderer"
 				)
-				currentTime = document.querySelector(
-					".ytp-chrome-bottom .ytp-time-current"
-				).textContent
-
-				currentLength = document.querySelector(
-					".ytp-chrome-bottom .ytp-time-duration"
-				).textContent
+				video = document.querySelector("video")
+				currentLength = video.duration
 
 				timeList = []
 				secondsList = []
@@ -83,8 +81,7 @@ VM.observe(document.body, () => {
 				}
 
 				// gets lenght of video playing and the one that should play
-				turnLengthIntoNumbers(currentLength)
-				currentLength = convertToSeconds(hours, minutes, seconds)
+				currentLength = Math.round(currentLength)
 				currentLengthActual = timeList[currentVideo - 1]
 				turnLengthIntoNumbers(currentLengthActual)
 				currentLengthActual = convertToSeconds(hours, minutes, seconds)
@@ -95,10 +92,10 @@ VM.observe(document.body, () => {
 					currentLength === currentLengthActual - 1
 				) {
 					// adds time of video playing to past
-					turnLengthIntoNumbers(currentTime)
-					currentTime = convertToSeconds(hours, minutes, seconds)
-					sumnSecondsPast += currentTime
+					currentTime = video.currentTime
 				}
+				currentTime = Math.floor(currentTime)
+				sumnSecondsPast += currentTime
 			}
 
 			function normaliseTime(hours, minutes, seconds) {
@@ -147,7 +144,7 @@ VM.observe(document.body, () => {
 			}
 
 			function convertToSeconds(hours, minutes, seconds) {
-				seconds += minutes * 60 + hours * 360
+				seconds += minutes * 60 + hours * 3600
 				return seconds
 			}
 
