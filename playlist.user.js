@@ -107,10 +107,12 @@ VM.observe(document.body, () => {
 				quo = Math.floor(minutes / 60)
 				minutes %= 60
 				hours += quo
-				minutes = minutes.toLocaleString("en-US", {
-					minimumIntegerDigits: 2,
-					useGrouping: false,
-				})
+				if (hours > 0 || minutes > 9) {
+					minutes = minutes.toLocaleString("en-US", {
+						minimumIntegerDigits: 2,
+						useGrouping: false,
+					})
+				}
 				seconds = seconds.toLocaleString("en-US", {
 					minimumIntegerDigits: 2,
 					useGrouping: false,
@@ -160,18 +162,17 @@ VM.observe(document.body, () => {
 					"style-scope",
 					"ytd-playlist-panel-renderer"
 				)
-				duration.textContent =
-					totalPast[0] +
-					":" +
-					totalPast[1] +
-					":" +
-					totalPast[2] +
-					" / " +
-					total[0] +
-					":" +
-					total[1] +
-					":" +
-					total[2]
+				if (totalPast[0] === 0) {
+					past = totalPast[1] + ":" + totalPast[2]
+				} else {
+					past = totalPast[0] + ":" + totalPast[1] + ":" + totalPast[2]
+				}
+				if (total[0] === 0) {
+					future = total[1] + ":" + total[2]
+				} else {
+					future = total[0] + ":" + total[1] + ":" + total[2]
+				}
+				duration.textContent = past + " / " + future
 				duration.style.marginInline = "8px"
 				duration.style.fontWeight = "bold"
 				publisherContainer.append(duration)
