@@ -96,7 +96,11 @@ VM.observe(document.body, () => {
 				) {
 					// adds time of video playing to past
 					currentTime = video.currentTime
-				} else if (typeof currentTime === "undefined") {
+				} else if (
+					typeof currentTime === "undefined" ||
+					currentTime === secondsList[currentVideo - 2] ||
+					currentTime === secondsList[currentVideo - 2] - 1
+				) {
 					currentTime = 0
 				}
 				currentTime = Math.floor(currentTime)
