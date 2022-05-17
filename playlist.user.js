@@ -5,7 +5,7 @@
 // @grant       none
 // @version     1.0
 // @author      Simon-Guillet
-// @description 13/05/2022, 00:04:25
+// @description Displays the time and duration on Youtube playlists
 // @require		https://cdn.jsdelivr.net/npm/@violentmonkey/dom@1
 // @downloadURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/raw/master/playlist.user.js
 // @updateURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/raw/master/playlist.user.js
