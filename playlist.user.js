@@ -6,12 +6,15 @@
 // @version     1.0
 // @author      Simon-Guillet
 // @description Displays the time and duration on Youtube playlists
+// @icon		https://github.com/Simon-Guillet/Youtube-Playlist-Duration/raw/master/playlist.png
 // @require		https://cdn.jsdelivr.net/npm/@violentmonkey/dom@1
 // @downloadURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/raw/master/playlist.user.js
 // @updateURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/raw/master/playlist.user.js
 // @supportURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/issues
 
 // ==/UserScript==
+
+// Playlist icons created by Freepik - Flaticon : https://www.flaticon.com/free-icons/playlist
 
 VM.observe(document.body, () => {
 	// Find the target node
