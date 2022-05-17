@@ -7,8 +7,8 @@
 // @author      Simon-Guillet
 // @description 13/05/2022, 00:04:25
 // @require		https://cdn.jsdelivr.net/npm/@violentmonkey/dom@1
-// @downloadURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/blob/master/playlist.user.js
-// @updateURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/blob/master/playlist.user.js
+// @downloadURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/raw/master/playlist.user.js
+// @updateURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/raw/master/playlist.user.js
 // @supportURL	https://github.com/Simon-Guillet/Youtube-Playlist-Duration/issues
 
 // ==/UserScript==
