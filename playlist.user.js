@@ -93,6 +93,8 @@ VM.observe(document.body, () => {
 				) {
 					// adds time of video playing to past
 					currentTime = video.currentTime
+				} else if (typeof currentTime === "undefined") {
+					currentTime = 0
 				}
 				currentTime = Math.floor(currentTime)
 				sumnSecondsPast += currentTime
