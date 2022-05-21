@@ -89,6 +89,15 @@ VM.observe(document.body, () => {
 				turnLengthIntoNumbers(currentLengthActual)
 				currentLengthActual = convertToSeconds(hours, minutes, seconds)
 
+				if (typeof testCurrentVideo === "undefined") {
+					testCurrentVideo = currentVideo
+				} else if (testCurrentVideo === currentVideo) {
+					isVideoNew = false
+				} else {
+					isVideoNew = true
+					testCurrentVideo = currentVideo
+				}
+
 				// is video playing not an ad?
 				if (
 					currentLength === currentLengthActual ||
@@ -96,11 +105,7 @@ VM.observe(document.body, () => {
 				) {
 					// adds time of video playing to past
 					currentTime = video.currentTime
-				} else if (
-					typeof currentTime === "undefined" ||
-					currentTime === secondsList[currentVideo - 2] ||
-					currentTime === secondsList[currentVideo - 2] - 1
-				) {
+				} else if (typeof currentTime === "undefined" || isVideoNew) {
 					currentTime = 0
 				}
 				currentTime = Math.floor(currentTime)
